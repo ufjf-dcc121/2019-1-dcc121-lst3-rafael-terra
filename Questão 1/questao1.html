@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <title>Questão 1</title>
+    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+
+</head>
+
+<body>
+    <div id="gameContainer">
+        <h1>Tic-Tac-Toe</h1>
+        <p id="player">Current player: <span id="turn"></span></p>
+        <table>
+            <tr id="row0">
+                <td id="00">
+                </td>
+                <td id="01">
+                </td>
+                <td id="02">
+                </td>
+            </tr>
+            <tr id="row1">
+                <td id="10">
+                </td>
+                <td id="11">
+                </td>
+                <td id="12">
+                </td>
+            </tr>
+            <tr id="row2">
+                <td id="20">
+                </td>
+                <td id="21">
+                </td>
+                <td id="22">
+                </td>
+            </tr>
+        </table>
+        <button id="newGame">New Game</button>
+        <p id="winner"></p>
+    </div>
+
+    <script>
+        var turnEl = document.querySelector("#turn");
+        var newGameEl = document.querySelector("#newGame");
+        var winnerEl = document.querySelector("#winner");
+        var row0 = document.querySelector("#row0");
+        var row1 = document.querySelector("#row1");
+        var row2 = document.querySelector("#row2");
+        var empty = 0;
+        var cross = 1;
+        var circle = 2;
+        var matrix = [];
+        var turn = 1;
+        var inGame = true;
+        var countElements = 0;
+        winnerEl.textContent = "";
+        //create matrix
+        for (var i = 0; i < 3; i++) {
+            matrix[i] = [];
+        }
+        //basic functions
+        function eraseMatrix() {
+            for (var i = 0; i < 3; i++) {
+                for (var j = 0; j < 3; j++) {
+                    matrix[i][j] = empty;
+                }
+            }
+            countElements = 0;
+        }
+        function removeAllChildren(element) {
+            while (element.firstChild) {
+                element.removeChild(element.firstChild);
+            }
+        }
+        function updateTurn() {
+            if (turn == 1)
+                turnEl.textContent = "X";
+            else
+                turnEl.textContent = "Círculo";
+
+        }
+        function printMatrix() {
+            for (var j = 0; j < 3; j++) {
+                //reset children
+                removeAllChildren(row0.children[j]);
+                removeAllChildren(row1.children[j]);
+                removeAllChildren(row2.children[j]);
+
+                var circleImg = document.createElement("img");
+                circleImg.src = "/circle.png";
+                circleImg.width = "42";
+                circleImg.height = "42";
+                var crossImg = document.createElement("img");
+                crossImg.src = "/x.jpg";
+                crossImg.width = "42";
+                crossImg.height = "42";
+
+                if (matrix[0][j] == circle)
+                    row0.children[j].appendChild(circleImg);
+                else if (matrix[0][j] == cross)
+                    row0.children[j].appendChild(crossImg);
+                else if (matrix[0][j] == empty)
+                    removeAllChildren(row1.children[j]);
+
+                if (matrix[1][j] == circle)
+                    row1.children[j].appendChild(circleImg);
+                else if (matrix[1][j] == cross)
+                    row1.children[j].appendChild(crossImg);
+                else if (matrix[1][j] == empty)
+                    removeAllChildren(row1.children[j]);
+
+                if (matrix[2][j] == circle)
+                    row2.children[j].appendChild(circleImg);
+                else if (matrix[2][j] == cross)
+                    row2.children[j].appendChild(crossImg);
+                else if (matrix[2][j] == empty)
+                    removeAllChildren(row2.children[j]);
+            }
+        }
+        function createListener(i, j) {
+
+            return function setClick() {
+                console.log(i + " : " + j);
+                if (inGame && i < 3 && j < 3 && matrix[i][j] == empty) {
+                    countElements++;
+                    var lastTurn = turn;
+                    if (turn == 1) {
+                        matrix[i][j] = cross;
+                        turn = 2;
+                    } else {
+                        matrix[i][j] = circle;
+                        turn = 1;
+                    }
+                    if (checkWinCondition1() || checkWinCondition2() || checkWinCondition3() || checkWinCondition4()) {
+                        inGame = false;
+                        if (lastTurn == 1)
+                            winnerEl.textContent = "Winner: Cross";
+                        else
+                            winnerEl.textContent = "Winner: Circle";
+                        console.log("Winner: " + lastTurn);
+                    }else if (countElements == 9) {
+                        inGame = false;
+                        winnerEl.textContent = "Draw";
+
+                    }
+                    updateTurn();
+                    updateElement(i, j);
+
+                }
+            }
+
+        }
+        //win conditions
+        function checkWinCondition1() {
+            //vertical
+            for (var j = 0; j < 3; j++) {
+                if ((matrix[0][j] > empty) && matrix[0][j] == matrix[1][j] && matrix[1][j] == matrix[2][j]) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        function checkWinCondition2() {
+            //horizontal
+            for (var i = 0; i < 3; i++) {
+                if ((matrix[i][0] > empty) && matrix[i][0] == matrix[i][1] && matrix[i][1] == matrix[i][2]) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        function checkWinCondition3() {
+            //diagonal 
+            if ((matrix[0][0] > empty) && matrix[0][0] == matrix[1][1] && matrix[1][1] == matrix[2][2]) {
+                return true;
+            }
+            else return false;
+        }
+        function checkWinCondition4() {
+            //other diagonal
+            if ((matrix[0][2] > empty) && matrix[0][2] == matrix[1][1] && matrix[1][1] == matrix[2][0]) {
+                return true;
+            }
+            else return false;
+        }
+        function addListeners() {
+            for (var j = 0; j < 3; j++) {
+                row0.children[j].addEventListener("click", createListener(0, j));
+                row1.children[j].addEventListener("click", createListener(1, j));
+                row2.children[j].addEventListener("click", createListener(2, j));
+            }
+        }
+        function updateElement(i, j) {
+            //reset children
+            var circleImg = document.createElement("img");
+            circleImg.src = "/circle.png";
+            circleImg.width = "42";
+            circleImg.height = "42";
+            var crossImg = document.createElement("img");
+            crossImg.src = "/x.png";
+            crossImg.width = "42";
+            crossImg.height = "42";
+            if (i == 0) {
+                row0.children[j].children = "";
+                if (matrix[i][j] == circle)
+                    row0.children[j].appendChild(circleImg);
+                else if (matrix[i][j] == cross)
+                    row0.children[j].appendChild(crossImg);
+                else if (matrix[i][j] == empty)
+                    removeAllChildren(row0.children[j]);
+
+            }
+            else if (i == 1) {
+                row1.children[j].children = "";
+                if (matrix[i][j] == circle)
+                    row1.children[j].appendChild(circleImg);
+                else if (matrix[i][j] == cross)
+                    row1.children[j].appendChild(crossImg);
+                else if (matrix[i][j] == empty)
+                    removeAllChildren(row1.children[j]);
+            }
+            else if (i == 2) {
+                row2.children[j].children = "";
+                if (matrix[i][j] == circle)
+                    row2.children[j].appendChild(circleImg);
+                else if (matrix[i][j] == cross)
+                    row2.children[j].appendChild(crossImg);
+                else if (matrix[i][j] == empty)
+                    removeAllChildren(row2.children[j]);
+            }
+        }
+        newGameEl.addEventListener("click", function setIngame() {
+            console.log("New Game");
+            turn = 1;
+            inGame = true;
+            winnerEl.textContent = "";
+
+            eraseMatrix();
+            printMatrix();
+            updateTurn();
+        });
+
+        //starts the game
+        eraseMatrix();
+        updateTurn();
+        printMatrix();
+        addListeners();
+
+
+    </script>
+</body>
+
+</html>
