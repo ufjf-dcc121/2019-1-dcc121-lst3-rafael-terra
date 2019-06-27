@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <title>Questão 2</title>
+    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+</head>
+
+<body>
+    <div class="region">
+        <p>A</p>
+        <ul id="regionA"></ul>
+    </div>
+    <div class="region">
+        <p>B</p>
+        <ul id="regionB"></ul>
+    </div>
+    <div class="region">
+        <p>C</p>
+        <ul id="regionC"></ul>
+    </div>
+    <div id="control">
+        <form name="option">
+            <p>
+                <label>Move from: </label>
+                <select id="from">
+                    <option value="0">A</option>
+                    <option value="1">B</option>
+                    <option value="2">C</option>
+                </select>
+                <label> to: </label>
+                <select id="to">
+                    <option value="0">A</option>
+                    <option value="1">B</option>
+                    <option value="2">C</option>
+                </select>
+            </p>
+            <input type="button" name="move" value="Move" />
+            <input type="button" name="reset" value="Restart" />
+        </form>
+        <p>Movements: <span id="mv"></span></p>
+        <p id="win"></p>
+    </div>
+    <script>
+        var formM = document.forms.option;
+        var moveButton = formM.move;
+        var resetButton = formM.reset;
+        var movements = 0;
+        var aList = document.querySelector("#regionA");
+        var bList = document.querySelector("#regionB");
+        var cList = document.querySelector("#regionC");
+        var mvEl = document.querySelector("#mv");
+        var winEl = document.querySelector("#win");
+        var stacks = [];
+        var inUse = [];
+        var inGame = true;
+        for (var i = 0; i < 3; i++) {
+            stacks[i] = [];
+            inUse[i] = 0;
+        }
+        for (var i = 4; i >= 0; i--) {
+            stacks[0][i] = i + 1;
+            inUse[0]++;
+        }
+        function updateList(choosenList) {
+            if (choosenList == 0) {
+                while (aList.firstChild) {
+                    aList.removeChild(aList.firstChild);
+                }
+            } else if (choosenList == 1) {
+                while (bList.firstChild) {
+                    bList.removeChild(bList.firstChild);
+                }
+
+            } else if (choosenList == 2) {
+                while (cList.firstChild) {
+                    cList.removeChild(cList.firstChild);
+                }
+
+            }
+            for (var i = (inUse[choosenList] - 1); i >= 0; i--) {
+                var newLi = document.createElement("li");
+                newLi.textContent = stacks[choosenList][i];
+                newLi.id = String(i + 1);
+                if (choosenList == 0) {
+                    aList.appendChild(newLi);
+                }
+                else if (choosenList == 1) {
+
+                    bList.appendChild(newLi);
+                }
+                else if (choosenList == 2) {
+
+                    cList.appendChild(newLi);
+                }
+            }
+        }
+        function checkWinCondition() {
+            for (var i = 0; i < 5; i++) {
+                if (stacks[2][i] != 5 - i)
+                    return false;
+            }
+            return true;
+        }
+        function moveElement() {
+
+            var from = Number(formM.from.value);
+            var to = Number(formM.to.value);
+            console.log(from + "  " + to);
+            var sizeFrom = inUse[from];
+            var sizeTo = inUse[to];
+            if (inGame) {
+
+                if (from != to && sizeFrom > 0) {
+
+                    if ((sizeTo > 0 && stacks[from][sizeFrom - 1] < stacks[to][sizeTo - 1]) || sizeTo == 0) {
+                        stacks[to].push(stacks[from][sizeFrom - 1]);
+                        stacks[from].splice(sizeFrom - 1, 1);
+                        inUse[from]--;
+                        inUse[to]++;
+                        updateList(from);
+                        updateList(to);
+                        movements++;
+                        mvEl.textContent = movements;
+                    }
+                }
+                if (checkWinCondition()) {
+                    winEl.textContent = "You won with " + movements + " movement(s)! Press Restart to play again.";
+                }
+            }
+        }
+        moveButton.addEventListener("click", moveElement);
+        resetButton.addEventListener("click", reset);
+        function reset() {
+            for (var i = 0; i < 3; i++) {
+                stacks[i].splice(0, inUse[i]);
+                inUse[i] = 0;
+            }
+            for (var i = 0; i < 5; i++) {
+                stacks[0][i] = 5 - i;
+                inUse[0]++;
+            }
+            movements = 0;
+            mvEl.textContent = movements;
+            winEl.textContent = "";
+            updateList(0);
+            updateList(1);
+            updateList(2);
+            inGame = true;
+        }
+        reset();
+    </script>
+</body>
+
+</html>
