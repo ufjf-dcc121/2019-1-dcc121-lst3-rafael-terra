@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8'>
+    <title>Questão 3</title>
+    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+</head>
+
+<body>
+    <div id="tabletop">
+    </div>
+    <div id="controls">
+        <button id="solve">Solve</button>
+        <button id="reset">Reset</button>
+    </div>
+    <script>
+        var tabletop = document.querySelector("#tabletop");
+        var solveB = document.querySelector("#solve");
+        var resetB = document.querySelector("#reset");
+        var matrix = [];
+        var movements = -1;
+        var horsePos = {
+            x: 0,
+            y: 0
+        };
+        for (var i = 0; i < 8; i++) {
+            matrix[i] = [];
+            for (var j = 0; j < 8; j++) {
+                matrix[i][j] = -1;
+            }
+        }
+        function drawMatrix() {
+            //remove all the children
+            while (tabletop.firstChild) {
+                tabletop.removeChild(tabletop.firstChild);
+            }
+            var horse = document.createElement("img");
+            horse.src = "horse.png";
+            horse.width = 46;
+            horse.height = 46;
+            if (movements == -1) {
+                for (var i = 0; i < 8; i++) {
+                    for (var j = 0; j < 8; j++) {
+                        var newDiv = document.createElement("div");
+                        if (matrix[i][j] == -1) {
+                            if ((i + j) % 2 == 0)
+                                newDiv.classList = "free-pair";
+                            else
+                                newDiv.classList = "free-odd";
+                        }
+                        else {
+                            newDiv.classList = "occupied";
+                        }
+                        newDiv.addEventListener("click", createListener(i, j));
+                        tabletop.appendChild(newDiv);
+                    }
+                }
+            }
+            else {
+                matrix[horsePos.x][horsePos.y] = movements;
+                for (var i = 0; i < 8; i++) {
+                    for (var j = 0; j < 8; j++) {
+                        var enableListener = false;
+                        var newDiv = document.createElement("div");
+                        if (i == horsePos.x + 2 && j == horsePos.y + 1 && matrix[i][j] == -1) {
+                            newDiv.classList = "ableToJump";
+                            enableListener = true;
+                        }
+                        else if (i == horsePos.x + 2 && j == horsePos.y - 1 && matrix[i][j] == -1) {
+                            enableListener = true;
+                            newDiv.classList = "ableToJump";
+                        }
+                        else if (i == horsePos.x + 1 && j == horsePos.y + 2 && matrix[i][j] == -1) {
+                            newDiv.classList = "ableToJump";
+                            enableListener = true;
+                        }
+                        else if (i == horsePos.x - 1 && j == horsePos.y + 2 && matrix[i][j] == -1) {
+                            newDiv.classList = "ableToJump";
+                            enableListener = true;
+                        }
+                        else if (i == horsePos.x - 2 && j == horsePos.y + 1 && matrix[i][j] == -1) {
+                            newDiv.classList = "ableToJump";
+                            enableListener = true;
+                        }
+                        else if (i == horsePos.x - 2 && j == horsePos.y - 1 && matrix[i][j] == -1) {
+                            newDiv.classList = "ableToJump";
+                            enableListener = true;
+                        }
+                        else if (i == horsePos.x + 1 && j == horsePos.y - 2 && matrix[i][j] == -1) {
+                            newDiv.classList = "ableToJump";
+                            enableListener = true;
+                        }
+                        else if (i == horsePos.x - 1 && j == horsePos.y - 2 && matrix[i][j] == -1) {
+                            newDiv.classList = "ableToJump";
+                            enableListener = true;
+                        }
+                        else if (matrix[i][j] == -1) {
+                            if ((i + j) % 2 == 0)
+                                newDiv.classList = "free-pair";
+                            else
+                                newDiv.classList = "free-odd";
+                        }
+                        else {
+                            newDiv.classList = "occupied";
+                            if (i != horsePos.x || j != horsePos.y) {
+                                newDiv.textContent = matrix[i][j];
+
+                            }
+                        }
+                        if (i == horsePos.x && j == horsePos.y)
+                            newDiv.appendChild(horse);
+                        if (enableListener)
+                            newDiv.addEventListener("click", createListener(i, j));
+                        tabletop.appendChild(newDiv);
+                    }
+                }
+            }
+        }
+        function createListener(x, y) {
+            return function escolhePos() {
+                horsePos.x = x;
+                horsePos.y = y;
+                movements++;
+                drawMatrix();
+            }
+        }
+        //sleep 1s
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        async function solve() {
+            /*
+            if (movements == 0)
+                await sleep(1000);
+                */
+        }
+
+        solveB.addEventListener("click", solve);
+        reset.addEventListener("click", function reset() {
+            movements = -1;
+            for (var i = 0; i < 8; i++) {
+                for (var j = 0; j < 8; j++) {
+                    matrix[i][j] = -1;
+                }
+            }
+            drawMatrix();
+        });
+        drawMatrix();
+    </script>
+</body>
+
+</html>

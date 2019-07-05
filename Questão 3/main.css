@@ -1,0 +1,53 @@
+#tabletop{
+    width: 384px;
+    height: 384px;
+    border: 1px solid black;
+    border-collapse: collapse;
+    margin-left: auto;
+    margin-right: 36%;
+}
+div{
+    text-align: center;
+    font-size: 40px;
+    color: lightskyblue;
+}
+.occupied{
+    width: 46px;
+    height: 46px;
+    border: 1px solid black;
+    border-collapse: collapse;
+    margin: 0px;
+    float: left;
+    background-color: gray;
+    
+
+}
+.ableToJump{
+    width: 46px;
+    height: 46px;
+    border: 1px solid black;
+    border-collapse: collapse;
+    margin: 0px;
+    float: left;
+    background-color: yellow;
+}
+.free-odd{
+    width: 46px;
+    height: 46px;
+    border: 1px solid black;
+    border-collapse: collapse;
+    margin: 0px;
+    float: left;
+    background-color: black;
+
+}
+.free-pair{
+    width: 46px;
+    height: 46px;
+    border: 1px solid black;
+    border-collapse: collapse;
+    margin: 0px;
+    float: left;
+    background-color: white;
+
+}
