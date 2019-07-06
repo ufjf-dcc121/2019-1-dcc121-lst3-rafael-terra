@@ -19,6 +19,8 @@
         var solveB = document.querySelector("#solve");
         var resetB = document.querySelector("#reset");
         var matrix = [];
+        var matrixAux = [];
+        var possibleMovements = [{ x: 2, y: 1 }, { x: 2, y: -1 }, { x: -2, y: 1 }, { x: -2, y: -1 }, { x: 1, y: 2 }, { x: -1, y: 2 }, { x: 1, y: -2 }, { x: -1, y: -2 }];
         var movements = -1;
         var horsePos = {
             x: 0,
@@ -26,8 +28,10 @@
         };
         for (var i = 0; i < 8; i++) {
             matrix[i] = [];
+            matrixAux[i] = [];
             for (var j = 0; j < 8; j++) {
                 matrix[i][j] = -1;
+                matrixAux[i][j] = -1;
             }
         }
         function drawMatrix() {
@@ -63,45 +67,20 @@
                     for (var j = 0; j < 8; j++) {
                         var enableListener = false;
                         var newDiv = document.createElement("div");
-                        if (i == horsePos.x + 2 && j == horsePos.y + 1 && matrix[i][j] == -1) {
-                            newDiv.classList = "ableToJump";
-                            enableListener = true;
+                        for (var k = 0; k < possibleMovements.length; k++) {
+                            if (i == horsePos.x + possibleMovements[k].x && j == horsePos.y + possibleMovements[k].y && matrix[i][j] == -1) {
+                                newDiv.classList = "ableToJump";
+                                enableListener = true;
+                                break;
+                            }
                         }
-                        else if (i == horsePos.x + 2 && j == horsePos.y - 1 && matrix[i][j] == -1) {
-                            enableListener = true;
-                            newDiv.classList = "ableToJump";
-                        }
-                        else if (i == horsePos.x + 1 && j == horsePos.y + 2 && matrix[i][j] == -1) {
-                            newDiv.classList = "ableToJump";
-                            enableListener = true;
-                        }
-                        else if (i == horsePos.x - 1 && j == horsePos.y + 2 && matrix[i][j] == -1) {
-                            newDiv.classList = "ableToJump";
-                            enableListener = true;
-                        }
-                        else if (i == horsePos.x - 2 && j == horsePos.y + 1 && matrix[i][j] == -1) {
-                            newDiv.classList = "ableToJump";
-                            enableListener = true;
-                        }
-                        else if (i == horsePos.x - 2 && j == horsePos.y - 1 && matrix[i][j] == -1) {
-                            newDiv.classList = "ableToJump";
-                            enableListener = true;
-                        }
-                        else if (i == horsePos.x + 1 && j == horsePos.y - 2 && matrix[i][j] == -1) {
-                            newDiv.classList = "ableToJump";
-                            enableListener = true;
-                        }
-                        else if (i == horsePos.x - 1 && j == horsePos.y - 2 && matrix[i][j] == -1) {
-                            newDiv.classList = "ableToJump";
-                            enableListener = true;
-                        }
-                        else if (matrix[i][j] == -1) {
+                        if (matrix[i][j] == -1 && !enableListener) {
                             if ((i + j) % 2 == 0)
                                 newDiv.classList = "free-pair";
                             else
                                 newDiv.classList = "free-odd";
                         }
-                        else {
+                        else if (matrix[i][j] > -1) {
                             newDiv.classList = "occupied";
                             if (i != horsePos.x || j != horsePos.y) {
                                 newDiv.textContent = matrix[i][j];
@@ -131,12 +110,129 @@
         }
 
         async function solve() {
-            /*
-            if (movements == 0)
-                await sleep(1000);
-                */
+            for (var i = 0; i < 8; i++) {
+                for (var j = 0; j < 8; j++) {
+                    matrixAux[i][j] = matrix[i][j];
+                }
+            }
+            var x = horsePos.x;
+            var y = horsePos.y;
+            var result = solveAux(movements + 1, x, y);
+            if (result) {
+                var lowestX;
+                var lowestY;
+                var lowestMov;
+                while (movements < 64) {
+                    lowestMov = 65;
+                    console.log(movements);
+                    for (var i = 0; i < 8; i++) {
+                        if ((horsePos.x + possibleMovements[i].x >= 0 && horsePos.x + possibleMovements[i].x <= 7) && (horsePos.y + possibleMovements[i].y >= 0 && horsePos.y + possibleMovements[i].y <= 7)) {
+                            if (matrixAux[(horsePos.x + possibleMovements[i].x)][horsePos.y + possibleMovements[i].y] < lowestMov && matrixAux[(horsePos.x + possibleMovements[i].x)][horsePos.y + possibleMovements[i].y] > 0) {
+                                lowestX = horsePos.x + possibleMovements[i].x;
+                                lowestY = horsePos.y + possibleMovements[i].y;
+                                lowestMov = matrixAux[(horsePos.x + possibleMovements[i].x)][horsePos.y + possibleMovements[i].y];
+                            }
+                        }
+                    }
+                    horsePos.x = lowestX;
+                    horsePos.y = lowestY;
+                    movements = lowestMov;
+                    await sleep(1000);
+                    drawMatrix();
+                }
+            } else {
+                console.log("Impossível resolver a partir dessa casa!");
+            }
         }
+        /*
+        function isEmpty(x, y) {
+            if ((x >= 0 && x <= 7) && (y >= 0 && y <= 7) && matrixAux[x][y] == -1) {
+                return true;
+            }
+            else
+                return false;
+        }
+        function getDegree(x, y) {
+            var count = 0;
+            for (var i = 0; i < 8; i++) {
+                if (isEmpty(x + possibleMovements[i].x, y + possibleMovements[i].y)) {
+                    count++
+                }
+            }
+            return count;
+        }
+        function nextMove(x, y) {
+            var minDegIdx = -1;
+            var c;
+            var minDeg = 9;
+            var nextX;
+            var nextY;
+            var start = Math.floor(Math.random() * 8);
 
+            for (var count = 0; count < 8; count++) {
+                var i = (start + count) % 8;
+                nextX = x + possibleMovements[i].x;
+                nextY = y + possibleMovements[i].y;
+                if (isEmpty(nextX, nextY)){
+                    c = getDegree(nextX, nextY);
+                    if (c < minDeg) {
+                        minDegIdx = i;
+                        minDeg = c;
+
+                    }
+
+                }
+            }
+            nextX = x + possibleMovements[minDegIdx].x;
+            nextY = y + possibleMovements[minDegIdx].y;
+            if (minDeg == -1)
+                return false;
+            matrixAux[nextX][nextY] = matrixAux[x][y] + 1;
+            x = nextX;
+            y = nextY;
+            return true;
+        }
+        function neighbor(x, y, xx, yy) {
+            for (var i = 0; i < 8; i++) {
+                if (((x + possibleMovements[i].x) == xx) && ((y + possibleMovements[i].y) == yy))
+                    return true;
+            }
+            return false;
+        }
+        */
+        function solveAux(mov, x, y) {
+
+            /*
+               var sx = x;
+               var sy = y;
+               for (var i = 0; i < 63; ++i)
+                   if (!nextMove(x, y))
+                       return false;
+               if (!neighbour(x, y, sx, sy))
+                   return false;
+               return true;
+           */
+
+            var nextX;
+            var nextY;
+            var valH;
+            if (mov == 65)
+                return 1;
+            for (var k = 0; k < 8; k++) {
+                nextX = x + possibleMovements[k].x;
+                nextY = y + possibleMovements[k].y;
+                if ((nextX >= 0 && nextX <= 7) && (nextY >= 0 && nextY <= 7)) {
+                    if (matrixAux[nextX][nextY] == -1) {
+                        matrixAux[nextX][nextY] = mov;
+                        valH = solveAux(mov + 1, nextX, nextY);
+                        if (valH == 0)
+                            matrixAux[nextX][nextY] = -1;
+                        else return true;
+                    }
+                }
+            }
+            return false;
+        }
         solveB.addEventListener("click", solve);
         reset.addEventListener("click", function reset() {
             movements = -1;
